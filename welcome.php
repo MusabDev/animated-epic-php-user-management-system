@@ -14,7 +14,7 @@ if (isset($_POST["submit"])) {
     $cpassword = mysqli_real_escape_string($conn, md5($_POST["cpassword"]));
 
     if ($password === $cpassword) {
-        $photo_name = $_FILES["photo"]["name"];
+        $photo_name = mysqli_real_escape_string($conn, $_FILES["photo"]["name"]);
         $photo_tmp_name = $_FILES["photo"]["tmp_name"];
         $photo_size = $_FILES["photo"]["size"];
         $photo_new_name = rand() . $photo_name;
