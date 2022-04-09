@@ -1,13 +1,16 @@
 <?php
 
 $hostname = "localhost";
-$username = "akhfqkli_login_register_youtube";
-$password = "_RxF9!NO?mzv";
-$database = "akhfqkli_login_register_youtube";
+$username = "root";
+$password = "";
+$database = "test";
 
 $conn = mysqli_connect($hostname, $username, $password, $database) or die("Database connection failed");
 
-$base_url = "https://code.akhfasoft.net/login-register-youtube/";
-$my_email = "code@akhfasoft.net";
+$base_url = "http://localhost:4444/";
+$my_email = "YOUR_EMAIL";
 
-?>
+$smtp['host'] = "smtp.gmail.com";
+$smtp['user'] = "";
+$smtp['pass'] = "";
+$smtp['port'] = 465;

@@ -2,7 +2,18 @@
 
 include 'config.php';
 
+//Import PHPMailer classes into the global namespace
+//These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
 session_start();
+
+error_reporting(0);
 
 if (isset($_SESSION["user_id"])) {
   header("Location: welcome.php");
@@ -14,38 +25,54 @@ if (isset($_POST["resetPassword"])) {
   $check_email = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'");
 
   if (mysqli_num_rows($check_email) > 0) {
-      $data = mysqli_fetch_assoc($check_email);
-      
-      $to = $email;
-      $subject = "Reset Password - Pure Coding YouTube";
-    
-      $message = "
-      <html>
-      <head>
-      <title>{$subject}</title>
-      </head>
-      <body>
-      <p><strong>Dear {$data['full_name']},</strong></p>
-      <p>Forgot Password? Not a problem. Click below link to reset your password.</p>
-      <p><a href='{$base_url}reset-password.php?token={$data['token']}'>Reset Password</a></p>
-      </body>
-      </html>
-      ";
-    
-      // Always set content-type when sending HTML email
-      $headers = "MIME-Version: 1.0" . "\r\n";
-      $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    
-      // More headers
-      $headers .= "From: ". $my_email;
-    
-      if (mail($to,$subject,$message,$headers)) {
-        echo "<script>alert('We have sent a reset password link to your email - {$email}.');</script>";
-      } else {
-        echo "<script>alert('Mail not sent. Please try again.');</script>";
-      }
+    $data = mysqli_fetch_assoc($check_email);
+
+    $to = $email;
+    $subject = "Reset Password - Pure Coding YouTube";
+
+    $message = "
+    <html>
+    <head>
+    <title>{$subject}</title>
+    </head>
+    <body>
+    <p><strong>Dear {$data['full_name']},</strong></p>
+    <p>Forgot Password? Not a problem. Click below link to reset your password.</p>
+    <p><a href='{$base_url}reset-password.php?token={$data['token']}'>Reset Password</a></p>
+    </body>
+    </html>
+    ";
+
+    //Create an instance; passing `true` enables exceptions
+    $mail = new PHPMailer(true);
+
+    try {
+      //Server settings
+      $mail->SMTPDebug = 0;                      //Enable verbose debug output
+      $mail->isSMTP();                                            //Send using SMTP
+      $mail->Host       = $smtp['host'];                     //Set the SMTP server to send through
+      $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+      $mail->Username   = $smtp['user'];                     //SMTP username
+      $mail->Password   = $smtp['pass'];                               //SMTP password
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+      $mail->Port       = $smtp['port'];                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+
+      //Recipients
+      $mail->setFrom($my_email);
+      $mail->addAddress($email, $data['full_name']);     //Add a recipient
+
+      //Content
+      $mail->isHTML(true);                                  //Set email format to HTML
+      $mail->Subject = $subject;
+      $mail->Body    = $message;
+
+      $mail->send();
+      echo "<script>alert('We have sent a reset password link to your email - {$email}.');</script>";
+    } catch (Exception $e) {
+      echo "<script>alert('Mail not sent. Please try again.');</script>";
+    }
   } else {
-      echo "<script>alert('Email not found.');</script>";
+    echo "<script>alert('Email not found.');</script>";
   }
 }
 

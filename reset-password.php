@@ -2,6 +2,8 @@
 
 include 'config.php';
 
+error_reporting(0);
+
 session_start();
 
 if (isset($_SESSION["user_id"])) {
@@ -16,7 +18,7 @@ if (isset($_POST["resetPassword"])) {
     mysqli_query($conn, $sql);
     header("Location: index.php");
   } else {
-      echo "<script>alert('Password not matched.');</script>";
+    echo "<script>alert('Password not matched.');</script>";
   }
 }
 
